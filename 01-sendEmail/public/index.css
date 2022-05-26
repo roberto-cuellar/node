@@ -1,0 +1,14 @@
+body{
+    padding: 30px;
+}
+
+
+form{
+    background-color: rgba(128, 128, 128, 0.418);
+    padding: 10px;
+    border-radius: 5px;    
+}
+
+form textarea{
+    margin-bottom: 10px;
+}

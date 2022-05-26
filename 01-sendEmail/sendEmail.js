@@ -1,3 +1,4 @@
+// Send an email using nodemailer
 require('dotenv').config();
 const nodemailer = require('nodemailer');
 
@@ -15,7 +16,7 @@ const transporter = nodemailer.createTransport({
 const mailOptions  = {
     from: emailFrom,
     to: emailTo,
-    subject: 'Sending Email using Node.js',
+    subject: 'Sending Email using Node.js 112',
     text: 'That was easy'
 }
 
