@@ -1,8 +1,10 @@
 
 const cheerio = require("cheerio");
+const { rmSync } = require("fs");
 const puppeteer = require('puppeteer');
 
 let html = [];
+let articulos = [];
 
 (async () => {
     const browser = await puppeteer.launch();
@@ -16,6 +18,37 @@ let html = [];
     scrape(html);  
     browser.close();
   })();
+
+class Articulo{
+    constructor(
+        titulo,
+        autores,
+        afiliacion,
+        doi,
+        keywordsVect,
+        resumen,
+        citaStd,
+        linkPdf,
+        linkImg,
+        year,
+        vol,
+        num
+        ){
+            this.titulo = titulo;
+            this.autores = autores;
+            this.afiliacion = afiliacion;
+            this.doi = doi;
+            this.keywordsVect = keywordsVect;
+            this.resumen = resumen;
+            this.citaStd = citaStd;
+            this.linkPdf =linkPdf;
+            this.linkImg = linkImg;
+            this.year = year;
+            this.vol = vol;
+            this.num = num;
+        
+    }
+}
 
 
 function scrape(html) {
@@ -77,7 +110,8 @@ function scrape(html) {
     console.log('Volumen: ',vol)
     console.log('Número: ',num)
     console.log('Año: ',year)
-    
-
+    console.log("Como clase: -------")
+    articulos.push(new Articulo(titulo,autores,afiliacion,doi,keywordsVect,resumen,citaStd,linkPdf,linkImg,year,vol,num));
+    console.log(articulos);
 
 }
