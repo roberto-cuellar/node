@@ -1,41 +1,30 @@
 
-const fs = require('fs');
-const express = require("express");
-const pretty = require("pretty")
-const axios = require("axios");
 const cheerio = require("cheerio");
-const download = require('download');
 const puppeteer = require('puppeteer');
 
-const app = express();
-
 let html = [];
+
 (async () => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-  
-    await page.goto('https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/article/view/206');
+    await page.goto('https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/article/view/207');
     await page.screenshot({
       path: 'landing-page-1.png',
       fullPage: true
     });
     html = await page.content();
-    scrape(html);
-    //console.log(html)
-  
+    scrape(html);  
     browser.close();
   })();
 
 
-
 function scrape(html) {
-
-    ///const file = fs.readFileSync('test2.html');
-    const $ = cheerio.load(html);
-    // console.log(pretty(page.html()))
+    const $ = cheerio.load(html);    
     
+    /// Extracción de los autores
     const titulo = $('h1').text().trim();
     console.log(titulo);
+
     /// Extracción de los autores
     $('.authors .name').each(function (idx,el) {
         console.log($(el).text().trim());
