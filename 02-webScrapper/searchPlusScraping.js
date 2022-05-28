@@ -7,7 +7,7 @@ let html = [];
 (async () => {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    await page.goto('https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/article/view/207');
+    await page.goto('https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/article/view/210');
     await page.screenshot({
       path: 'landing-page-1.png',
       fullPage: true
@@ -26,22 +26,31 @@ function scrape(html) {
     console.log(titulo);
 
     /// Extracción de los autores
+    let autores = []
     $('.authors .name').each(function (idx,el) {
-        console.log($(el).text().trim());
+        autores.push($(el).text().trim())
     });
+    console.log('Autores: ',autores);
     
     //// Extracción de la afiliación
+    let afiliacion = []
     $('.authors .affiliation').each(function (idx,el) {
-        console.log($(el).text().trim());
+        afiliacion.push($(el).text().trim())
     })
+    console.log('Afiliación: ',afiliacion);
+
     
     /// Extracción del doi
     const doi = $('.doi .value').text().trim();
     console.log('DOI: ',doi);
     
     /// Extracción de las palabras clave
-    const keywords = $('.keywords .value').text().trim();
-    console.log('Palabras clave: ',keywords);
+    let keywordsVect = []
+    let keywords = $('.keywords .value').text().trim().split(',');
+    keywords.forEach(element => {
+        keywordsVect.push(element.trim())
+    })
+    console.log('Palabras clave: ',keywordsVect);
     
     /// Extracción del Resumen
     const resumen = $('.abstract p').text().trim();
@@ -58,4 +67,17 @@ function scrape(html) {
     /// Extracción del link de la imagen abstract por medio del atributo src de la etiquta img
     const linkImg = $('.cover_image .sub_item img').attr('src');
     console.log('Link a la imagen: ',linkImg)
+
+    /// Extracción del volumen al que pertenece 
+    const issue = $('.issue .sub_item .value .title').text().trim().split(" ");
+    const vol = issue[1];
+    const num = issue[3];
+    //Del año se deben quitar los paréntesis
+    const year = issue[4].replace(/["'\(\)]/g, "");
+    console.log('Volumen: ',vol)
+    console.log('Número: ',num)
+    console.log('Año: ',year)
+    
+
+
 }
