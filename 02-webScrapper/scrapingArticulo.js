@@ -18,12 +18,11 @@ module.exports = {
                 const contenidoScrap = scrape(html); /// Realización del scraping
                 await browser.close(); /// Cierre del navegador
                 /// Verificación de que el scraping no sea nulo
-                if(contenidoScrap===undefined){
+                if(contenidoScrap===undefined || contenidoScrap.titulo === ''){
                     response[0] = false;
                     response[1] = 'Scraping realizado pero resultó vacío';
                 }else{
                     response[1] = contenidoScrap; /// Respuesta del scraping
-                    //guardar(contenidoScrap);
                 }
 
             }else{
@@ -54,7 +53,7 @@ module.exports = {
     }
  }
 
-function scrape(html){
+function scrape(html){ //// Función de scraping --- Artículo
     const $ = cheerio.load(html);    
     
     /// Extracción de los autores
@@ -153,28 +152,3 @@ function scrape(html){
     }
     
 }
-
-
-// async function guardar(elemento) {  
-//     await mongoose.connect(mongoUrl);
-
-//     const articuloSchema = new mongoose.Schema({ // Esquema de los elementos
-//         titulo: String,
-//         autores: Array,
-//         afiliacion: Array,
-//         doi: String,
-//         keywordsVect: Array,
-//         resumen: String,
-//         citaStd: String,
-//         linkPdf: String,
-//         linkImg: String,
-//         year: String,
-//         vol: String,
-//         num: String
-//     });
-    
-//     const ArticuloDB = mongoose.model('Articulostestdos',articuloSchema);
-//     let articulo = new ArticuloDB(elemento);
-//     await articulo.save();
-//     console.log('Articulo guardado');
-// }
