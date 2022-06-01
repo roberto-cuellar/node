@@ -6,36 +6,49 @@ const puppeteer = require('puppeteer');
 
 module.exports = {
     scrapingArticulo: async function(url) {
-        let response = []; //La respuesta será un array en cuya primera posición
+        let response = [false,'']; //La respuesta será un array en cuya primera posición
         // se tendrá si se realizó el scrape, y la segunda será el resultado o el error
-        try{
-            const browser = await puppeteer.launch();
-            const newPage = await browser.newPage();
-            const pagina = await newPage.goto(url);
-            if(pagina.status()===200){
-                response[0] = true;
-                const html = await newPage.content(); /// Carga de la página del artículo
-                const contenidoScrap = scrape(html); /// Realización del scraping
-                await browser.close(); /// Cierre del navegador
-                /// Verificación de que el scraping no sea nulo
-                if(contenidoScrap===undefined || contenidoScrap.titulo === ''){
-                    response[0] = false;
-                    response[1] = 'Scraping realizado pero resultó vacío';
+        let intentos = 5; /// Intentos para realizar la petición
+        do{
+            try{
+                response[0] = false;
+                intentos = intentos-1;
+                const browser = await puppeteer.launch();
+                const newPage = await browser.newPage();
+                const pagina = await newPage.goto(url);
+                if(pagina.status()===200){
+                    response[0] = true;
+                    const html = await newPage.content(); /// Carga de la página del artículo
+                    const contenidoScrap = scrape(html); /// Realización del scraping
+                    await browser.close(); /// Cierre del navegador
+                    /// Verificación de que el scraping no sea nulo
+                    if(contenidoScrap===undefined || contenidoScrap.titulo === ''){
+                        response[0] = false;
+                        response[1] = 'Scraping realizado pero resultó vacío';
+                    }else{
+                        response[1] = contenidoScrap; /// Respuesta del scraping
+                    }
+
                 }else{
-                    response[1] = contenidoScrap; /// Respuesta del scraping
+                    response[0] = false; /// En caso de una respuesta negativa
                 }
 
-            }else{
-                response[0] = false; /// En caso de una respuesta negativa
+            }catch(err){
+                //response[0] = false;
+                response[1] = err;
+                console.log('\x1b[33m%s\x1b[0m','Error en la respuesta, Intentos Restantes: ',intentos);
+                // intentos = intentos-1;
+                // console.log('\x1b[33m%s\x1b[0m','Error en la respuesta, Intentos Restantes: ',intentos);
+                //this.scrapingArticulo(url);                            
             }
-
-        }catch(err){
-            response[0] = false;
-            response[1] = err;
-        }
-        finally{
-            return response;
-        }
+            
+            
+        }while(response[0]==false && intentos >0)
+        
+        return response
+        // finally{
+        //     return response;
+        // }
     },
     Schema: { // Esquema de los elementos
         titulo: String,
