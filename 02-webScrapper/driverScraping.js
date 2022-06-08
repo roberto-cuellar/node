@@ -6,6 +6,8 @@
 /// El scrape Total, recibirá la URL de la página en donde se alojan todos los volumenes, luego llamará a la función volumen para hacer el scraping por volumen
 /// posteriormente se llamará a la función scrape por artículo que se encargará de scrapear cada uno de los artículos scrapeados por la función scrapear por volumen
 
+require('events').EventEmitter.defaultMaxListeners = Infinity; /// Esto para aumentar el límite de eventos escuchados, esto solo se debe usar si es estrictamente necesario,
+/// en este caso no hay errores en el código (aparentemente), pero si hay una gran cantidad de eventos, por ende se optó por aumente este límite, conociendo que la app no entra en un loop infinito    
 
 
 // Modulos Propios
@@ -15,134 +17,141 @@ const scrapingVolumenModule = require('./scrapingVolumen');
 // En el driver se tendrá el acceso a la base de datos, aquí se tendrá la configuración, y la conexión solo se hará 
 // cuando sea requerida por el usuario
 const mongoose = require("mongoose");
-const mongoUrl = "mongodb://localhost:27017/articulosUrlDB";
+const mongoUrl = "mongodb+srv://LOCAL.@cluster0.cfbyp.mongodb.net/BISTUA"; // Clound database
+// const mongoUrl = "mongodb://localhost:27017/articulosUrlDB";
 const Schema = scrapingArticuloModule.Schema;
 const articuloSchema = new mongoose.Schema(Schema);
-const ArticuloDB = mongoose.model('articulosfoundTEST',articuloSchema); 
+const ArticuloDB = mongoose.model('articulo',articuloSchema); 
 
 
 const listaVolumenes = [
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/98', // 20-1
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/82', //19-2
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/81', // 19-1
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/69', // 18-2
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/14', // 18-1
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/16', // 17-2
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/17', // 17-1
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/42', // 16-2
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/44', // 16-1
-    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/47', // 15-2
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/98', // 20-1 ya
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/82', //19-2 ya
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/81', // 19-1 ya
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/69', // 18-2 ya
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/14', // 18-1   ya
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/16', // 17-2
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/17', // 17-1
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/42', // 16-2
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/44', // 16-1
+    // 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/47', // 15-2
     'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/48' // 15-1
 
 ];
 
-
-/// Configuración de entrada
-
-const posiblesScraping = ['articulo','volumen','total']; /// Posibles scraping realizables
-const tipoScrap = posiblesScraping[0]; /// Selección del tipo de scraping a realizar
-const flagAlmacenamiento = true; /// Selección del flag de almacenamiento
-const flagScrapArticulosVolumen = true; /// Selección del flag de scraping de los artículos encontrados en el scraping tipo volumen
-const flagImprimirArticulo = true; /// Bandera Mostrar artículo por consola
-const url = 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/article/view/1125'; /// URL a scrapear, tenga cuidado, esta URL aún no tiene validación, por lo que debe ser
-// la url adecuada para el tipo de scrap seleccionado
-
-console.log('\x1b[36m%s\x1b[0m','+++----------------- Configuración del Scraping ------------------+++');
-console.log('\x1b[36m%s\x1b[0m','Tipo de Scraping Seleccionado : ',tipoScrap);
-console.log('\x1b[36m%s\x1b[0m','Almacenamiento : ', flagAlmacenamiento);
-console.log('\x1b[36m%s\x1b[0m','URL : ', url);
-if(tipoScrap !== 'articulo'){
-    console.log('\x1b[36m%s\x1b[0m',`Scraping por artículos al ${tipoScrap} : `,flagScrapArticulosVolumen);
-}
-
-let almacenamientoIniciado = false; // Bandera para validar si ya se activó el almacenamiento por artículos
-
-switch(tipoScrap){
-    case 'articulo':
-        scrapArticulo(url,flagAlmacenamiento,flagImprimirArticulo);
-        break;
-
-    case 'volumen':
-        scrapVolumen(url,flagAlmacenamiento,flagScrapArticulosVolumen);
-        break;
-
-    case 'total':
-        /// Por hacer
-        break;
-}
+listaVolumenes.forEach((volumen)=>{
+    scrapearVolumen(volumen);
+})
 
 
+    /// Configuración de entrada
+function scrapearVolumen(volumenToScrap) {  
+    const posiblesScraping = ['articulo','volumen','total']; /// Posibles scraping realizables
+    const tipoScrap = posiblesScraping[1]; /// Selección del tipo de scraping a realizar
+    const flagAlmacenamiento = true; /// Selección del flag de almacenamiento
+    const flagScrapArticulosVolumen = true; /// Selección del flag de scraping de los artículos encontrados en el scraping tipo volumen
+    const flagImprimirArticulo = false; /// Bandera Mostrar artículo por consola
+    const url = volumenToScrap; /// URL a scrapear, tenga cuidado, esta URL aún no tiene validación, por lo que debe ser
+    // const url = 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/article/view/1125'; /// URL a scrapear, tenga cuidado, esta URL aún no tiene validación, por lo que debe ser
+    // la url adecuada para el tipo de scrap seleccionado
 
-async function scrapArticulo(url,flagAlmacenamiento,flagImprimirArticulo){ /// Scrap por artículo function
-    let articuloResponse =  await scrapingArticuloModule.scrapingArticulo(url);
-    if(articuloResponse[0] == false){
-        console.error('\x1b[31m%s\x1b[0m','Error en el Scraping, log :',articuloResponse[1]);
-        return false
-    }else{        
-        if(flagImprimirArticulo){ /// Impresión del artículo
-            console.log('\x1b[35m%s\x1b[0m','+++--------------------------------- Scrap Artículo Respuesta ----------------------------------+++');
-            console.log(articuloResponse[1]);
-        }else{
-            console.log('\x1b[32m%s\x1b[0m','>>>>>>>>>>>>>>>>>> Artículo Scrapeado Correctamente');
-        }
-        if(flagAlmacenamiento){
-            !almacenamientoIniciado&&mongoose.connect(mongoUrl,function (e) {   // Si no se ha establecido la conexión se inicia
-                if(e){
-                    console.log('\x1b[31m%s\x1b[0m','Error en la conexión con la DB ',e);
-                }else{
-                    console.log('\x1b[32m%s\x1b[0m','Conexión establecida correctamente');
-                    almacenamientoIniciado = !almacenamientoIniciado; /// Cambia el estado de la conexión
-                }
-            });
-            // const Schema = scrapingArticuloModule.Schema;
-            // const articuloSchema = new mongoose.Schema(Schema);
-            // const ArticuloDB = mongoose.model('testarticulo',articuloSchema);             
-            const articulo = new ArticuloDB(articuloResponse[1]);
-            await articulo.save(function (e) {  
+    console.log('\x1b[36m%s\x1b[0m','+++----------------- Configuración del Scraping ------------------+++');
+    console.log('\x1b[36m%s\x1b[0m','Tipo de Scraping Seleccionado : ',tipoScrap);
+    console.log('\x1b[36m%s\x1b[0m','Almacenamiento : ', flagAlmacenamiento);
+    console.log('\x1b[36m%s\x1b[0m','URL : ', url);
+    if(tipoScrap !== 'articulo'){
+        console.log('\x1b[36m%s\x1b[0m',`Scraping por artículos al ${tipoScrap} : `,flagScrapArticulosVolumen);
+    }
+
+    let almacenamientoIniciado = false; // Bandera para validar si ya se activó el almacenamiento por artículos
+
+    switch(tipoScrap){
+        case 'articulo':
+            scrapArticulo(url,flagAlmacenamiento,flagImprimirArticulo);
+            break;
+
+        case 'volumen':
+            scrapVolumen(url,flagAlmacenamiento,flagScrapArticulosVolumen);
+            break;
+
+        case 'total':
+            /// Por hacer
+            break;
+    }
+
+
+
+    async function scrapArticulo(url,flagAlmacenamiento,flagImprimirArticulo){ /// Scrap por artículo function
+        let articuloResponse =  await scrapingArticuloModule.scrapingArticulo(url);
+        if(articuloResponse[0] == false){
+            console.error('\x1b[31m%s\x1b[0m','Error en el Scraping, log :',articuloResponse[1]);
+            return false
+        }else{        
+            if(flagImprimirArticulo){ /// Impresión del artículo
+                console.log('\x1b[35m%s\x1b[0m','+++--------------------------------- Scrap Artículo Respuesta ----------------------------------+++');
+                console.log(articuloResponse[1]);
+            }else{
+                console.log('\x1b[32m%s\x1b[0m','>>>>>>>>>>>>>>>>>> Artículo Scrapeado Correctamente');
+            }
+            if(flagAlmacenamiento){
+                !almacenamientoIniciado&&mongoose.connect(mongoUrl,function (e) {   // Si no se ha establecido la conexión se inicia
                     if(e){
-                    console.log('\x1b[31m%s\x1b[0m','Error en el guardado del artículo en la BD: ',e)
-                }else{
-                    console.log('\x1b[32m%s\x1b[0m','Artículo guardado correctamente')
-                }
-            });            
-        }        
-    }
-    return true
-}
-
-
-async function scrapVolumen(url,flagAlmacenamiento,flagScrapArticulosVolumen,flagImprimirArticulo){ /// Scrap por volumen function
-    let volumenResponse = await scrapingVolumenModule.scrapingVolumen(url);
-    if(volumenResponse[0] == false){
-        console.error('\x1b[31m%s\x1b[0m','Error en el Scraping, log :',volumenResponse[1]);
-    }else{
-        console.log('\x1b[35m%s\x1b[0m','+++--------------------------------- Scrap Volumen Respuesta ----------------------------------+++');
-        console.log('\x1b[32m%s\x1b[0m','>>>>>>>>>>>>>>>>>> Volumen Scrapeado Correctamente');
-        console.log('\x1b[33m%s\x1b[0m',volumenResponse[1].titulos);
-    }
-    /// En caso de requerirse el scraping de todos los elementos encontrados:
-    if(flagScrapArticulosVolumen){
-        const urlsArticulos = volumenResponse[1].urls;
-        const cantidad = urlsArticulos.length;
-        if(cantidad!==0){ /// En caso de que la longitud no sea nula
-            let conteo = 0; /// Constante para llevar la cuenta de los artículos que se les ha hecho scraping
-            console.log('\x1b[37m%s\x1b[0m','||||||--------------Número de artículos para scraping: ',cantidad)
-            let scrapearArticulos = urlsArticulos.forEach((url,idx )=>{
-                let result = scrapArticulo(url,flagAlmacenamiento,flagImprimirArticulo) /// Retorna una promesa
-                .then(result => { /// Al resolverse esa promesa
-                    console.log('\x1b[33m%s\x1b[0m','Resultado scraping artículo # ',idx,', Resultado: ', result);
-                    if(result){
-                        conteo++;
-                        console.log(conteo, ' Artículos Scrapeados de ',cantidad);
+                        console.log('\x1b[31m%s\x1b[0m','Error en la conexión con la DB ',e);
                     }else{
-                        console.error('\x1b[31m%s\x1b[0m','NO SE PUDO COMPLETAR EL SCRAPING DEL ARTÍCULO ',idx);            
+                        console.log('\x1b[32m%s\x1b[0m','Conexión establecida correctamente');
+                        almacenamientoIniciado = !almacenamientoIniciado; /// Cambia el estado de la conexión
                     }
                 });
-               
-            });
+                // const Schema = scrapingArticuloModule.Schema;
+                // const articuloSchema = new mongoose.Schema(Schema);
+                // const ArticuloDB = mongoose.model('testarticulo',articuloSchema);             
+                const articulo = new ArticuloDB(articuloResponse[1]);
+                await articulo.save(function (e) {  
+                        if(e){
+                        console.log('\x1b[31m%s\x1b[0m','Error en el guardado del artículo en la BD: ',e)
+                    }else{
+                        console.log('\x1b[32m%s\x1b[0m','Artículo guardado correctamente')
+                    }
+                });            
+            }        
+        }
+        return true
+    }
 
+
+    async function scrapVolumen(url,flagAlmacenamiento,flagScrapArticulosVolumen,flagImprimirArticulo){ /// Scrap por volumen function
+        let volumenResponse = await scrapingVolumenModule.scrapingVolumen(url);
+        if(volumenResponse[0] == false){
+            console.error('\x1b[31m%s\x1b[0m','Error en el Scraping, log :',volumenResponse[1]);
         }else{
-            console.error('\x1b[31m%s\x1b[0m','NO SE RECIBIÓ NINGÚN ARTÍCULO PARA SCRAPING');
-        }    
-    }  
+            console.log('\x1b[35m%s\x1b[0m','+++--------------------------------- Scrap Volumen Respuesta ----------------------------------+++');
+            console.log('\x1b[32m%s\x1b[0m','>>>>>>>>>>>>>>>>>> Volumen Scrapeado Correctamente');
+            console.log('\x1b[33m%s\x1b[0m',volumenResponse[1].titulos);
+        }
+        /// En caso de requerirse el scraping de todos los elementos encontrados:
+        if(flagScrapArticulosVolumen){
+            const urlsArticulos = volumenResponse[1].urls;
+            const cantidad = urlsArticulos.length;
+            if(cantidad!==0){ /// En caso de que la longitud no sea nula
+                let conteo = 0; /// Constante para llevar la cuenta de los artículos que se les ha hecho scraping
+                console.log('\x1b[37m%s\x1b[0m','||||||--------------Número de artículos para scraping: ',cantidad)
+                let scrapearArticulos = urlsArticulos.forEach((url,idx )=>{
+                    let result = scrapArticulo(url,flagAlmacenamiento,flagImprimirArticulo) /// Retorna una promesa
+                    .then(result => { /// Al resolverse esa promesa
+                        console.log('\x1b[33m%s\x1b[0m','Resultado scraping artículo # ',idx,', Resultado: ', result);
+                        if(result){
+                            conteo++;
+                            console.log(conteo, ' Artículos Scrapeados de ',cantidad);
+                        }else{
+                            console.error('\x1b[31m%s\x1b[0m','NO SE PUDO COMPLETAR EL SCRAPING DEL ARTÍCULO ',idx);            
+                        }
+                    });
+                
+                });
+
+            }else{
+                console.error('\x1b[31m%s\x1b[0m','NO SE RECIBIÓ NINGÚN ARTÍCULO PARA SCRAPING');
+            }    
+        }  
+    }
 }
