@@ -116,7 +116,7 @@ function scrape(html){ //// Función de scraping --- Artículo
     }
         
     /// Extracción de la cita standard
-    let citaStd = $('.csl-right-inline').text().trim();
+    let citaStd = $('.csl-entry').text().trim();
     if(citaStd === undefined){
         citaStd = '';
     }

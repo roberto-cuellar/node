@@ -18,18 +18,33 @@ const mongoose = require("mongoose");
 const mongoUrl = "mongodb://localhost:27017/articulosUrlDB";
 const Schema = scrapingArticuloModule.Schema;
 const articuloSchema = new mongoose.Schema(Schema);
-const ArticuloDB = mongoose.model('testarticulo',articuloSchema); 
+const ArticuloDB = mongoose.model('articulosfoundTEST',articuloSchema); 
 
+
+const listaVolumenes = [
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/98', // 20-1
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/82', //19-2
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/81', // 19-1
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/69', // 18-2
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/14', // 18-1
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/16', // 17-2
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/17', // 17-1
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/42', // 16-2
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/44', // 16-1
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/47', // 15-2
+    'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/48' // 15-1
+
+];
 
 
 /// Configuración de entrada
 
 const posiblesScraping = ['articulo','volumen','total']; /// Posibles scraping realizables
-const tipoScrap = posiblesScraping[1]; /// Selección del tipo de scraping a realizar
+const tipoScrap = posiblesScraping[0]; /// Selección del tipo de scraping a realizar
 const flagAlmacenamiento = true; /// Selección del flag de almacenamiento
 const flagScrapArticulosVolumen = true; /// Selección del flag de scraping de los artículos encontrados en el scraping tipo volumen
-const flagImprimirArticulo = false; /// Bandera Mostrar artículo por consola
-const url = 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/issue/view/82'; /// URL a scrapear, tenga cuidado, esta URL aún no tiene validación, por lo que debe ser
+const flagImprimirArticulo = true; /// Bandera Mostrar artículo por consola
+const url = 'https://ojs.unipamplona.edu.co/ojsviceinves/index.php/bistua/article/view/1125'; /// URL a scrapear, tenga cuidado, esta URL aún no tiene validación, por lo que debe ser
 // la url adecuada para el tipo de scrap seleccionado
 
 console.log('\x1b[36m%s\x1b[0m','+++----------------- Configuración del Scraping ------------------+++');
